@@ -1,3 +1,6 @@
 {
-  "name": "slack-sms-slash-command"
+  "name": "slack-sms-slash-command",
+  "dependencies": {
+    "aws-sdk": "^2.251.1"
+  }
 }

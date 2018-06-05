@@ -1,5 +1,11 @@
 const config = require('./config.json');
 const messages = require('./messages.json');
+const AWS = require('aws-sdk');
+const sns = new AWS.SNS({
+  accessKeyId: config.aws.access_key_id,
+  secretAccessKey: config.aws.secret_access_key,
+  region: config.aws.region
+});
 
 /**
  * Interpolate ${values} in a JSON object and replace with a given mapping.
@@ -38,7 +44,7 @@ function logRequest(req) {
  */
 function verifyToken(req) {
   // Verify token
-  if (!req.body || req.body.token !== config.verification_token) {
+  if (!req.body || req.body.token !== config.slack.verification_token) {
     const error = new Error('Invalid Credentials');
     error.code = 401;
     throw error;
@@ -52,13 +58,31 @@ function verifyToken(req) {
  * @param {object} req Cloud Function request context.
  */
 function verifyUser(req) {
-  console.log(req.body.user_id);
-  if (config.users.excluded.indexOf(req.body.user_id) >= 0 ||  // *not* excluded
-      (config.users.included.length > 0 &&                     // non-empty included
-       config.users.included.indexOf(req.body.user_id) < 0)) { // not included
+  if (config.slack.users.excluded.indexOf(req.body.user_id) >= 0 ||  // *not* excluded
+      (config.slack.users.included.length > 0 &&                     // non-empty included
+       config.slack.users.included.indexOf(req.body.user_id) < 0)) { // not included
+    console.log(`VERIFIED ${req.body.user_id}`);
     return Promise.reject(messages.slash_commands.bad_user);
   }
   return Promise.resolve(req);
+}
+
+/**
+ * Verify request contains proper validation token.
+ *
+ * @param {object} req Cloud Function request context.
+ */
+function publishMessage(req) {
+  return sns.publish(
+    {
+      Message: req.body.text,
+      TopicArn: config.aws.topic_arn
+    },
+    function(err, data) {
+      if (err) throw err;
+      console.log(data); // successful response
+      return req;
+    });
 }
 
 /**
@@ -68,8 +92,8 @@ function verifyUser(req) {
  */
 function getMessage(req) {
   return Promise.resolve(interpolate(messages.slash_commands.sms, {
-    color: config.color,
-    text: req.body.text
+    color: config.slack.color,
+    text: req.body.text.replace(/\n/g, '\\n').replace(/\r/g, '\\r')
   }));
 }
 
@@ -90,6 +114,7 @@ function getError(msg) {
 function getResponse(req) {
   return Promise.resolve(req)
     .then(verifyUser)
+    .then(publishMessage)
     .then(getMessage)
     .catch(getError);
 }

@@ -7,7 +7,7 @@ provider "template" {
 }
 
 locals {
-  version = "0.0.1"
+  version = "0.0.11"
 }
 
 // Slash command archive
