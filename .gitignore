@@ -59,3 +59,9 @@ typings/
 
 # next.js build output
 .next
+
+build/
+dist/
+src/*/messages.json
+config.json
+client_secret.json

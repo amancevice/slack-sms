@@ -1,0 +1,26 @@
+{
+  "name": "slack-sms",
+  "version": "0.0.1",
+  "description": "Send SMS messages from Slack",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "gulp": "^4.0.0",
+    "gulp-file": "^0.4.0",
+    "gulp-zip": "^4.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amancevice/slack-sms.git"
+  },
+  "keywords": [
+    "Slack",
+    "Google Drive"
+  ],
+  "author": "smallweirdnumber",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/amancevice/slack-sms/issues"
+  },
+  "homepage": "https://github.com/amancevice/slack-sms"
+}
